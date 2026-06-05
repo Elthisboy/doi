@@ -14,7 +14,7 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#fa4615">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="doi Soporte">
   <link rel="apple-touch-icon" href="assets/images/icons/icon-192.png">
 </head>
@@ -476,6 +476,7 @@
   </div>
 
   <!-- PWA Install Banner -->
+  <!-- Android PWA Install Banner -->
   <div id="pwa-install-banner" class="pwa-banner hidden">
     <div class="pwa-banner__content">
       <img class="pwa-banner__icon" src="assets/images/icons/icon-192.png" alt="doi" onerror="this.style.display='none'" width="40" height="40">
@@ -485,6 +486,27 @@
       </div>
       <button class="pwa-banner__install" id="pwa-install-btn">Instalar</button>
       <button class="pwa-banner__close" id="pwa-close-btn" aria-label="Cerrar">&times;</button>
+    </div>
+  </div>
+
+  <!-- iOS Safari Install Guide -->
+  <div id="ios-install-guide" class="ios-guide hidden">
+    <button class="ios-guide__close" id="ios-guide-close" aria-label="Cerrar">&times;</button>
+    <div class="ios-guide__content">
+      <img class="ios-guide__icon" src="assets/images/icons/icon-192.png" alt="doi" onerror="this.style.display='none'" width="44" height="44">
+      <h4 class="ios-guide__title">Instalar doi Soporte</h4>
+      <div class="ios-guide__steps">
+        <p class="ios-guide__step">
+          <span class="ios-guide__num">1</span>
+          Presiona el botón de <strong>Compartir</strong>
+          <svg class="ios-guide__share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          en la barra de Safari.
+        </p>
+        <p class="ios-guide__step">
+          <span class="ios-guide__num">2</span>
+          Desplázate y selecciona <strong>"Agregar a la pantalla de inicio"</strong>.
+        </p>
+      </div>
     </div>
   </div>
 
@@ -540,6 +562,28 @@
         if (banner) banner.classList.add('hidden');
         deferredPrompt = null;
       });
+
+      /* ===== iOS Safari Install Guide ===== */
+      var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      var isStandalone = window.navigator.standalone === true ||
+        window.matchMedia('(display-mode: standalone)').matches;
+      var iosGuide = document.getElementById('ios-install-guide');
+      var iosCloseBtn = document.getElementById('ios-guide-close');
+      var iosDismissed = sessionStorage.getItem('ios-guide-dismissed');
+
+      if (isIOS && !isStandalone && !iosDismissed && iosGuide) {
+        setTimeout(function () {
+          iosGuide.classList.remove('hidden');
+        }, 1500);
+      }
+
+      if (iosCloseBtn) {
+        iosCloseBtn.addEventListener('click', function () {
+          if (iosGuide) iosGuide.classList.add('hidden');
+          sessionStorage.setItem('ios-guide-dismissed', '1');
+        });
+      }
     })();
   </script>
 </body>

@@ -433,7 +433,7 @@
 
     html5Qr.start(
       { facingMode: 'environment' },
-      { fps: 10, qrbox: { width: 250, height: 250 } },
+      { fps: 10, qrbox: function (vw, vh) { var s = Math.floor(Math.min(vw, vh) * 0.7); return { width: s, height: s }; } },
       onScanSuccess,
       function () { /* silent scan-in-progress */ }
     ).then(() => {
@@ -447,19 +447,73 @@
 
   function onScanSuccess(decodedText) {
     console.log('QR escaneado:', decodedText);
-    const code = decodedText.trim().toUpperCase();
 
     closeQRScanner();
 
-    const product = findProductByCode(code);
+    var identifier = parseQRPayload(decodedText);
+    resolveScannedIdentifier(identifier);
+  }
+
+  function parseQRPayload(raw) {
+    var text = (raw || '').trim();
+
+    /* Check if it's a URL with a hash fragment */
+    if (text.indexOf('#') !== -1) {
+      var hashPart = text.split('#').pop().replace('/', '').trim();
+      if (hashPart.length > 0) return hashPart;
+    }
+
+    /* Check if it's a URL with a query parameter (e.g., ?code=S200) */
+    if (text.indexOf('?') !== -1) {
+      try {
+        var params = new URLSearchParams(text.split('?').pop());
+        var codeParam = params.get('code') || params.get('producto') || params.get('id');
+        if (codeParam) return codeParam.trim();
+      } catch (_) {}
+    }
+
+    /* Raw code or identifier */
+    return text;
+  }
+
+  function resolveScannedIdentifier(identifier) {
+    var id = identifier.toUpperCase();
+
+    /* Try direct product code match (S200, P600, etc.) */
+    var product = findProductByCode(id);
     if (product && product.active) {
       showToast('Producto encontrado: ' + product.title);
       navigateToProduct(product);
-    } else if (product) {
-      showToast('Producto ' + product.title + ' reconocido, pero aún no disponible.');
-    } else {
-      showToast('Código QR no corresponde a un producto doi registrado.');
+      return;
     }
+    if (product) {
+      showToast('Producto ' + product.title + ' reconocido, pero aún no disponible.');
+      return;
+    }
+
+    /* Try matching by product id slug (sitting, parador, etc.) */
+    var bySlug = PRODUCTS.find(function (p) {
+      return p.id.toLowerCase() === identifier.toLowerCase();
+    });
+    if (bySlug && bySlug.active) {
+      showToast('Producto encontrado: ' + bySlug.title);
+      navigateToProduct(bySlug);
+      return;
+    }
+    if (bySlug) {
+      showToast('Producto ' + bySlug.title + ' reconocido, pero aún no disponible.');
+      return;
+    }
+
+    /* Try matching known hash routes */
+    var hashRoutes = { estabilizacion: VIEWS.CATALOG, buscar: VIEWS.SEARCH };
+    var route = hashRoutes[identifier.toLowerCase()];
+    if (route) {
+      navigateTo(route);
+      return;
+    }
+
+    showToast('Código QR no corresponde a un producto doi registrado.');
   }
 
   function closeQRScanner() {

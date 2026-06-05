@@ -1181,6 +1181,106 @@ button {
 }
 
 /* ========================================
+   IOS INSTALL GUIDE BANNER
+   ======================================== */
+
+.ios-guide {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 1500;
+  background: var(--color-white);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  padding: 20px 20px 18px;
+  max-width: 400px;
+  margin: 0 auto;
+  animation: pwa-slide-up 0.4s ease;
+}
+
+.ios-guide__close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #999;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+}
+
+.ios-guide__close:hover {
+  color: var(--color-text-dark);
+}
+
+.ios-guide__content {
+  text-align: center;
+}
+
+.ios-guide__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  margin: 0 auto 10px;
+}
+
+.ios-guide__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-bottom: 14px;
+}
+
+.ios-guide__steps {
+  text-align: left;
+}
+
+.ios-guide__step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: #444;
+  line-height: 1.45;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.ios-guide__step:last-child {
+  margin-bottom: 0;
+}
+
+.ios-guide__step strong {
+  color: var(--color-text-dark);
+}
+
+.ios-guide__num {
+  width: 24px;
+  height: 24px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ios-guide__share-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--color-primary);
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* ========================================
    RESPONSIVE — TABLET
    ======================================== */
 
