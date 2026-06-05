@@ -110,19 +110,6 @@
       guiaPractica: 'assets/docs/parador-guia-practica.pdf',
       arLink: '#ar-parador',
     },
-    {
-      id: 'cuello-de-sujecion',
-      title: 'Cuello de Sujeción',
-      code: 'CS200',
-      category: 'estabilizacion',
-      active: false,
-      description: 'Soporte cervical de sujeción diseñado para ofrecer estabilidad y control del cuello durante actividades de posicionamiento.',
-      whatsapp: 'https://wa.me/56999694935?text=Hola%2C%20consulta%20sobre%20Cuello%20de%20Sujeci%C3%B3n%20(CS200)',
-      tutorial: '#',
-      guiaTecnica: 'assets/docs/cuello-sujecion-guia-tecnica.pdf',
-      guiaPractica: 'assets/docs/cuello-sujecion-guia-practica.pdf',
-      arLink: '#ar-cuello-sujecion',
-    },
   ];
 
   let currentView = VIEWS.HOME;

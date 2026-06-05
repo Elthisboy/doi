@@ -10,6 +10,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" href="assets/images/icons/favicon.ico" type="image/x-icon">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#fa4615">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="doi Soporte">
+  <link rel="apple-touch-icon" href="assets/images/icons/icon-192.png">
 </head>
 <body>
 
@@ -460,6 +466,72 @@
     </div>
   </div>
 
+  <!-- PWA Install Banner -->
+  <div id="pwa-install-banner" class="pwa-banner hidden">
+    <div class="pwa-banner__content">
+      <img class="pwa-banner__icon" src="assets/images/icons/icon-192.png" alt="doi" onerror="this.style.display='none'" width="40" height="40">
+      <div class="pwa-banner__text">
+        <strong>Instalar doi Soporte</strong>
+        <span>Accede rápido desde tu pantalla de inicio</span>
+      </div>
+      <button class="pwa-banner__install" id="pwa-install-btn">Instalar</button>
+      <button class="pwa-banner__close" id="pwa-close-btn" aria-label="Cerrar">&times;</button>
+    </div>
+  </div>
+
   <script src="js/app.js"></script>
+
+  <!-- Service Worker Registration & PWA Install Prompt -->
+  <script>
+    (function () {
+      /* Register Service Worker */
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('./sw.js')
+            .then(function (reg) {
+              console.log('SW registrado:', reg.scope);
+            })
+            .catch(function (err) {
+              console.warn('SW registro fallido:', err);
+            });
+        });
+      }
+
+      /* Capture beforeinstallprompt */
+      var deferredPrompt = null;
+      var banner = document.getElementById('pwa-install-banner');
+      var installBtn = document.getElementById('pwa-install-btn');
+      var closeBtn = document.getElementById('pwa-close-btn');
+
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (banner) banner.classList.remove('hidden');
+      });
+
+      if (installBtn) {
+        installBtn.addEventListener('click', function () {
+          if (!deferredPrompt) return;
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function (result) {
+            deferredPrompt = null;
+            if (banner) banner.classList.add('hidden');
+          });
+        });
+      }
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function () {
+          if (banner) banner.classList.add('hidden');
+        });
+      }
+
+      /* Hide banner if already installed */
+      window.addEventListener('appinstalled', function () {
+        if (banner) banner.classList.add('hidden');
+        deferredPrompt = null;
+      });
+    })();
+  </script>
 </body>
 </html>
