@@ -145,17 +145,19 @@
 
   function updateHash(view) {
     const map = {
-      [VIEWS.HOME]: '',
-      [VIEWS.CATALOG]: 'estabilizacion',
-      [VIEWS.DETAIL]: 'sitting',
-      [VIEWS.SEARCH]: 'buscar',
+      [VIEWS.HOME]: '#/',
+      [VIEWS.CATALOG]: '#estabilizacion',
+      [VIEWS.DETAIL]: '#sitting',
+      [VIEWS.SEARCH]: '#buscar',
     };
-    const hash = map[view] || '';
-    history.pushState(null, '', hash ? `#${hash}` : window.location.pathname);
+    const newHash = map[view] || '#/';
+    if (window.location.hash !== newHash) {
+      history.pushState(null, '', newHash);
+    }
   }
 
   function resolveHash() {
-    const hash = window.location.hash.replace('#', '');
+    const hash = window.location.hash.replace('#', '').replace('/', '');
     switch (hash) {
       case 'estabilizacion':
         return VIEWS.CATALOG;
