@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" href="assets/images/icons/favicon.ico" type="image/x-icon">
   <link rel="manifest" href="manifest.json">
@@ -47,7 +48,8 @@
       <div class="search-bar">
         <svg class="search-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
         <span class="search-bar__label">BUSCA TU PRODUCTO</span>
-        <input type="text" class="search-bar__input" id="search-input" placeholder="Nombre, código o categoría..." aria-label="Buscar producto">
+        <input type="text" class="search-bar__input" id="search-input" placeholder="Nombre, código o categoría..." aria-label="Buscar producto" autocomplete="off">
+        <button class="search-bar__clear hidden" id="search-clear-btn" type="button" aria-label="Limpiar búsqueda">&times;</button>
         <button class="search-bar__qr" id="btn-qr-scanner" type="button" aria-label="Escanear código QR">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         </button>
@@ -457,12 +459,19 @@
 
 
   <!-- ========================================
-       SCANNER MODAL OVERLAY
+       QR SCANNER MODAL OVERLAY
        ======================================== -->
   <div id="scanner-modal" class="modal-overlay hidden">
-    <div class="modal-container">
+    <div class="modal-container modal-container--scanner">
       <button class="modal-close" id="scanner-modal-close" aria-label="Cerrar">&times;</button>
-      <div id="scanner-modal-content"></div>
+      <h3 class="scanner__title">Escanea el código QR del producto</h3>
+      <p class="scanner__hint">Apunta la cámara al código QR de tu producto doi</p>
+      <div id="qr-reader" style="width: 100%; max-width: 500px; margin: 0 auto;"></div>
+      <div class="scanner__manual">
+        <p>¿No puedes escanear? Ingresa el código manualmente:</p>
+        <input type="text" class="scanner-desktop__input" id="manual-code-input" placeholder="Ej: S200" maxlength="10">
+        <button class="btn-pill btn-pill--active" id="manual-code-submit">BUSCAR CÓDIGO</button>
+      </div>
     </div>
   </div>
 

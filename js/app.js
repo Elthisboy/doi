@@ -259,10 +259,16 @@
     if (results.length === 0) {
       container.innerHTML = `
         <div class="search-empty">
-          <p class="search-empty__text">No se encontraron productos para "<strong>${escapeHtml(query)}</strong>"</p>
-          <p class="search-empty__hint">Intenta con otro término, código de producto o categoría.</p>
+          <svg class="search-empty__icon" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <p class="search-empty__text">No se encontraron productos que coincidan con tu búsqueda.</p>
+          <p class="search-empty__hint">Prueba con otro nombre, código de producto o categoría.</p>
+          <button class="btn-search-retry" id="btn-search-retry">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Volver a buscar
+          </button>
         </div>
       `;
+      document.getElementById('btn-search-retry').addEventListener('click', clearSearch);
       return;
     }
 
@@ -300,6 +306,7 @@
 
   function handleSearchInput(e) {
     const query = e.target.value;
+    updateClearButton(query);
 
     clearTimeout(searchDebounceTimer);
     searchDebounceTimer = setTimeout(() => {
@@ -309,22 +316,44 @@
         }
         return;
       }
+      /* Live filtering — no navigation, no focus stealing */
+    }, 150);
+  }
 
-      const results = searchProducts(query);
+  function executeSearch(query) {
+    const q = query.trim();
+    if (!q) return;
 
-      const exactMatch = findProductByCode(query);
-      if (exactMatch && exactMatch.active) {
-        navigateToProduct(exactMatch);
-        return;
-      }
+    const exactMatch = findProductByCode(q);
+    if (exactMatch && exactMatch.active) {
+      document.getElementById('search-input').blur();
+      navigateToProduct(exactMatch);
+      return;
+    }
 
-      document.getElementById('search-query-label').textContent = query;
-      document.getElementById('search-count').textContent = results.length;
-      renderSearchResults(results, query);
-      if (currentView !== VIEWS.SEARCH) {
-        navigateTo(VIEWS.SEARCH);
-      }
-    }, 300);
+    const results = searchProducts(q);
+    document.getElementById('search-query-label').textContent = q;
+    document.getElementById('search-count').textContent = results.length;
+    renderSearchResults(results, q);
+    document.getElementById('search-input').blur();
+    navigateTo(VIEWS.SEARCH);
+  }
+
+  function clearSearch() {
+    const input = document.getElementById('search-input');
+    input.value = '';
+    updateClearButton('');
+    if (currentView === VIEWS.SEARCH) {
+      navigateTo(VIEWS.HOME);
+    }
+    input.focus();
+  }
+
+  function updateClearButton(value) {
+    const btn = document.getElementById('search-clear-btn');
+    if (btn) {
+      btn.classList.toggle('hidden', !value || value.trim().length === 0);
+    }
   }
 
   /* ========================================
@@ -367,7 +396,7 @@
   }
 
   /* ========================================
-     QR CAMERA SCANNER
+     QR CAMERA SCANNER (html5-qrcode)
      ======================================== */
 
   function isMobileDevice() {
@@ -375,179 +404,82 @@
       ('ontouchstart' in window && window.innerWidth < 1024);
   }
 
+  let html5Qr = null;
+  let scannerRunning = false;
+
   function openQRScanner() {
-    if (!isMobileDevice()) {
-      showDesktopScannerModal();
-      return;
-    }
-    showCameraScanner();
-  }
-
-  function showDesktopScannerModal() {
     const overlay = document.getElementById('scanner-modal');
-    const content = document.getElementById('scanner-modal-content');
-    content.innerHTML = `
-      <div class="scanner-desktop">
-        <svg class="scanner-desktop__icon" viewBox="0 0 24 24" fill="none" stroke="#fa4615" stroke-width="1.5">
-          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-          <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
-        </svg>
-        <h3 class="scanner-desktop__title">Escáner QR no disponible</h3>
-        <p class="scanner-desktop__text">El escáner de códigos QR está optimizado para dispositivos móviles con cámara. Accede desde tu celular o tablet para escanear el código de tu producto.</p>
-        <div class="scanner-desktop__manual">
-          <p>También puedes ingresar el código del producto directamente en la barra de búsqueda:</p>
-          <input type="text" class="scanner-desktop__input" id="manual-code-input" placeholder="Ej: DOI102" maxlength="10">
-          <button class="btn-pill btn-pill--active" id="manual-code-submit">BUSCAR CÓDIGO</button>
-        </div>
-      </div>
-    `;
     overlay.classList.remove('hidden');
 
-    document.getElementById('manual-code-submit').addEventListener('click', () => {
-      const code = document.getElementById('manual-code-input').value;
-      const product = findProductByCode(code);
-      overlay.classList.add('hidden');
-      if (product && product.active) {
-        navigateToProduct(product);
-      } else if (product) {
-        showToast('Este producto aún no está disponible. ¡Pronto!');
-      } else {
-        showToast('Código no encontrado. Verifica e intenta nuevamente.');
-      }
-    });
-
-    document.getElementById('manual-code-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') document.getElementById('manual-code-submit').click();
-    });
-  }
-
-  function showCameraScanner() {
-    const overlay = document.getElementById('scanner-modal');
-    const content = document.getElementById('scanner-modal-content');
-    content.innerHTML = `
-      <div class="scanner-camera">
-        <h3 class="scanner-camera__title">Escanea el código QR del producto</h3>
-        <p class="scanner-camera__hint">Apunta la cámara al código QR de tu producto doi</p>
-        <div class="scanner-camera__viewport">
-          <video id="scanner-video" autoplay playsinline muted></video>
-          <canvas id="scanner-canvas" class="hidden"></canvas>
-          <div class="scanner-camera__frame"></div>
-        </div>
-        <p class="scanner-camera__status" id="scanner-status">Iniciando cámara...</p>
-        <div class="scanner-camera__manual">
-          <p>¿No puedes escanear? Ingresa el código manualmente:</p>
-          <input type="text" class="scanner-desktop__input" id="mobile-code-input" placeholder="Ej: DOI102" maxlength="10">
-          <button class="btn-pill btn-pill--active btn-pill--small" id="mobile-code-submit">BUSCAR</button>
-        </div>
-      </div>
-    `;
-    overlay.classList.remove('hidden');
-
-    document.getElementById('mobile-code-submit').addEventListener('click', () => {
-      const code = document.getElementById('mobile-code-input').value;
-      stopCameraStream();
-      overlay.classList.add('hidden');
-      const product = findProductByCode(code);
-      if (product && product.active) {
-        navigateToProduct(product);
-      } else if (product) {
-        showToast('Este producto aún no está disponible. ¡Pronto!');
-      } else {
-        showToast('Código no encontrado. Verifica e intenta nuevamente.');
-      }
-    });
-
-    document.getElementById('mobile-code-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') document.getElementById('mobile-code-submit').click();
-    });
-
-    startCameraStream();
-  }
-
-  let cameraStream = null;
-  let scanInterval = null;
-
-  function startCameraStream() {
-    const video = document.getElementById('scanner-video');
-    const status = document.getElementById('scanner-status');
-
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      status.textContent = 'Tu navegador no soporta acceso a la cámara.';
+    if (typeof Html5Qrcode === 'undefined') {
+      showToast('Error: librería de escaneo no disponible. Recarga la página.');
       return;
     }
 
-    navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: 'environment' }, audio: false })
-      .then((stream) => {
-        cameraStream = stream;
-        video.srcObject = stream;
-        status.textContent = 'Buscando código QR...';
-        startQRScan();
-      })
-      .catch((err) => {
-        if (err.name === 'NotAllowedError') {
-          status.textContent = 'Permiso de cámara denegado. Permite el acceso en la configuración de tu navegador.';
-        } else {
-          status.textContent = 'No se pudo acceder a la cámara. Usa la entrada manual.';
-        }
-      });
-  }
-
-  function stopCameraStream() {
-    if (scanInterval) {
-      clearInterval(scanInterval);
-      scanInterval = null;
+    /* Clean previous instance */
+    if (html5Qr) {
+      try { if (scannerRunning) html5Qr.stop(); } catch (_) {}
+      try { html5Qr.clear(); } catch (_) {}
+      html5Qr = null;
+      scannerRunning = false;
     }
-    if (cameraStream) {
-      cameraStream.getTracks().forEach((track) => track.stop());
-      cameraStream = null;
-    }
+
+    const reader = document.getElementById('qr-reader');
+    reader.innerHTML = '';
+
+    html5Qr = new Html5Qrcode('qr-reader', { verbose: false });
+
+    html5Qr.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      onScanSuccess,
+      function () { /* silent scan-in-progress */ }
+    ).then(() => {
+      scannerRunning = true;
+      console.log('QR: Cámara iniciada correctamente');
+    }).catch((err) => {
+      console.warn('QR: No se pudo iniciar la cámara:', err);
+      showToast('No se pudo acceder a la cámara. Usa la entrada manual.');
+    });
   }
 
-  function startQRScan() {
-    const video = document.getElementById('scanner-video');
-    const canvas = document.getElementById('scanner-canvas');
-    if (!canvas || !video) return;
+  function onScanSuccess(decodedText) {
+    console.log('QR escaneado:', decodedText);
+    const code = decodedText.trim().toUpperCase();
 
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    closeQRScanner();
 
-    scanInterval = setInterval(() => {
-      if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
-
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      try {
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const qrCode = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: 'dontInvert',
-        });
-
-        if (qrCode && qrCode.data) {
-          handleScannedCode(qrCode.data);
-        }
-      } catch (_) {
-        // jsQR not loaded — use manual fallback only
-      }
-    }, 250);
-  }
-
-  function handleScannedCode(rawCode) {
-    const code = rawCode.trim().toUpperCase();
     const product = findProductByCode(code);
-
-    stopCameraStream();
-    document.getElementById('scanner-modal').classList.add('hidden');
-
     if (product && product.active) {
-      showToast(`Producto encontrado: ${product.title}`);
+      showToast('Producto encontrado: ' + product.title);
       navigateToProduct(product);
     } else if (product) {
-      showToast(`Producto ${product.title} reconocido, pero aún no disponible.`);
+      showToast('Producto ' + product.title + ' reconocido, pero aún no disponible.');
     } else {
       showToast('Código QR no corresponde a un producto doi registrado.');
     }
+  }
+
+  function closeQRScanner() {
+    if (html5Qr) {
+      if (scannerRunning) {
+        html5Qr.stop().then(() => {
+          html5Qr.clear();
+          html5Qr = null;
+          scannerRunning = false;
+        }).catch(() => {
+          try { html5Qr.clear(); } catch (_) {}
+          html5Qr = null;
+          scannerRunning = false;
+        });
+      } else {
+        try { html5Qr.clear(); } catch (_) {}
+        html5Qr = null;
+      }
+    }
+    document.getElementById('scanner-modal').classList.add('hidden');
+    const reader = document.getElementById('qr-reader');
+    if (reader) reader.innerHTML = '';
   }
 
   /* ========================================
@@ -607,28 +539,38 @@
 
     const searchInput = document.getElementById('search-input');
     searchInput.addEventListener('input', handleSearchInput);
-    searchInput.addEventListener('focus', () => {
-      if (searchInput.value.trim().length > 0 && currentView !== VIEWS.SEARCH) {
-        const results = searchProducts(searchInput.value);
-        document.getElementById('search-query-label').textContent = searchInput.value;
-        document.getElementById('search-count').textContent = results.length;
-        renderSearchResults(results, searchInput.value);
-        navigateTo(VIEWS.SEARCH);
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        executeSearch(searchInput.value);
       }
     });
+
+    document.getElementById('search-clear-btn').addEventListener('click', clearSearch);
 
     document.getElementById('btn-qr-scanner').addEventListener('click', openQRScanner);
 
-    document.getElementById('scanner-modal-close').addEventListener('click', () => {
-      stopCameraStream();
-      document.getElementById('scanner-modal').classList.add('hidden');
-    });
+    document.getElementById('scanner-modal-close').addEventListener('click', closeQRScanner);
 
     document.getElementById('scanner-modal').addEventListener('click', (e) => {
-      if (e.target.id === 'scanner-modal') {
-        stopCameraStream();
-        document.getElementById('scanner-modal').classList.add('hidden');
+      if (e.target.id === 'scanner-modal') closeQRScanner();
+    });
+
+    document.getElementById('manual-code-submit').addEventListener('click', () => {
+      const code = document.getElementById('manual-code-input').value;
+      closeQRScanner();
+      const product = findProductByCode(code);
+      if (product && product.active) {
+        navigateToProduct(product);
+      } else if (product) {
+        showToast('Este producto aún no está disponible. ¡Pronto!');
+      } else if (code.trim()) {
+        showToast('Código no encontrado. Verifica e intenta nuevamente.');
       }
+    });
+
+    document.getElementById('manual-code-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('manual-code-submit').click();
     });
 
     window.addEventListener('popstate', () => {
