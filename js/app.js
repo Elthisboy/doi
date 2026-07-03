@@ -56,7 +56,7 @@
       storeUrl: 'https://doifamily.com/producto/sitting-m/',
       guiaTecnica: 'assets/docs/sitting-guia-tecnica.pdf',
       guiaPractica: 'assets/docs/sitting-guia-practica.pdf',
-      arLink: '#ar-sitting',
+      configPieces: ['calzon-pelvico', 'cunas-tronco', 'cuna-cabeza', 'abductor', 'otros-apoyos'],
     },
     {
       id: 'maxxitting',
@@ -69,7 +69,7 @@
       tutorial: '#',
       guiaTecnica: 'assets/docs/maxxitting-guia-tecnica.pdf',
       guiaPractica: 'assets/docs/maxxitting-guia-practica.pdf',
-      arLink: '#ar-maxxitting',
+      configPieces: ['calzon-pelvico', 'cunas-tronco', 'cuna-cabeza', 'abductor', 'otros-apoyos'],
     },
     {
       id: 'bipedestador-mediano',
@@ -82,7 +82,7 @@
       tutorial: '#',
       guiaTecnica: 'assets/docs/bipedestador-mediano-guia-tecnica.pdf',
       guiaPractica: 'assets/docs/bipedestador-mediano-guia-practica.pdf',
-      arLink: '#ar-bipedestador-mediano',
+      configPieces: ['calzon-pelvico', 'cunas-tronco', 'cuna-cabeza', 'abductor', 'otros-apoyos'],
     },
     {
       id: 'bipedestador-grande',
@@ -95,7 +95,7 @@
       tutorial: '#',
       guiaTecnica: 'assets/docs/bipedestador-grande-guia-tecnica.pdf',
       guiaPractica: 'assets/docs/bipedestador-grande-guia-practica.pdf',
-      arLink: '#ar-bipedestador-grande',
+      configPieces: ['calzon-pelvico', 'cunas-tronco', 'cuna-cabeza', 'abductor', 'otros-apoyos'],
     },
     {
       id: 'parador',
@@ -108,7 +108,7 @@
       tutorial: '#',
       guiaTecnica: 'assets/docs/parador-guia-tecnica.pdf',
       guiaPractica: 'assets/docs/parador-guia-practica.pdf',
-      arLink: '#ar-parador',
+      configPieces: ['calzon-pelvico', 'cunas-tronco', 'cuna-cabeza', 'abductor', 'otros-apoyos'],
     },
   ];
 
@@ -212,8 +212,6 @@
     document.getElementById('btn-whatsapp').href = d.whatsapp;
     document.getElementById('btn-guia-tecnica').href = d.guiaTecnica;
     document.getElementById('btn-guia-practica').href = d.guiaPractica;
-    document.getElementById('btn-ar').href = d.arLink;
-
     document.getElementById('breadcrumb-product').textContent = d.title;
 
     const storeBtn = document.getElementById('btn-store');
@@ -539,6 +537,36 @@
   }
 
   /* ========================================
+     CONFIGURATION MODAL (PASO 2 → PASO 3)
+     ======================================== */
+
+  const AR_BASE_URL = 'https://lustrous-pasca-9a0ae1.netlify.app/';
+  let configProductCode = null;
+
+  function openConfigModal() {
+    const d = PRODUCTS.find((p) => p.id === 'sitting') || PRODUCTS[0];
+    const title = document.getElementById('detail-title').textContent;
+    const code = document.getElementById('detail-code').textContent.replace('Código: ', '');
+    configProductCode = code;
+
+    document.getElementById('config-product-label').textContent = title + ' — ' + code;
+    document.getElementById('config-modal').classList.remove('hidden');
+  }
+
+  function closeConfigModal() {
+    document.getElementById('config-modal').classList.add('hidden');
+  }
+
+  function launchARView(mode) {
+    var url = AR_BASE_URL + '#' + configProductCode;
+    if (mode) {
+      url += '/' + mode;
+    }
+    window.open(url, '_blank', 'noopener');
+    closeConfigModal();
+  }
+
+  /* ========================================
      TOAST NOTIFICATIONS
      ======================================== */
 
@@ -610,6 +638,24 @@
 
     document.getElementById('scanner-modal').addEventListener('click', (e) => {
       if (e.target.id === 'scanner-modal') closeQRScanner();
+    });
+
+    document.getElementById('btn-config').addEventListener('click', openConfigModal);
+
+    document.getElementById('config-modal-close').addEventListener('click', closeConfigModal);
+
+    document.getElementById('config-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'config-modal') closeConfigModal();
+    });
+
+    document.getElementById('config-complete').addEventListener('click', () => {
+      launchARView('completa');
+    });
+
+    document.querySelectorAll('.config-badge').forEach((badge) => {
+      badge.addEventListener('click', () => {
+        launchARView(badge.dataset.piece);
+      });
     });
 
     document.getElementById('manual-code-submit').addEventListener('click', () => {

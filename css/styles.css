@@ -1062,6 +1062,169 @@ button {
 }
 
 /* ========================================
+   CONFIGURATION MODAL (PASO 2)
+   ======================================== */
+
+.modal-container--config {
+  max-width: 520px;
+  padding: 32px 28px 28px;
+}
+
+.config-modal__title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--color-text-dark);
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.config-modal__subtitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.config-modal__hint {
+  font-size: 0.82rem;
+  color: #777;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.config-modal__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.config-card {
+  background: #f7fbfd;
+  border: 2px solid #d8edf6;
+  border-radius: 14px;
+  padding: 20px;
+  cursor: pointer;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  font-family: var(--font-stack);
+  width: 100%;
+}
+
+.config-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 18px rgba(250, 70, 21, 0.12);
+  transform: translateY(-2px);
+}
+
+.config-card:active {
+  transform: translateY(0);
+}
+
+.config-card--pieces {
+  flex-direction: column;
+  align-items: stretch;
+  cursor: default;
+}
+
+.config-card--pieces:hover {
+  transform: none;
+}
+
+.config-card__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.config-card__icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  border-radius: 12px;
+  color: var(--color-white);
+}
+
+.config-card__icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.config-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.config-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-bottom: 4px;
+}
+
+.config-card__desc {
+  font-size: 0.8rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.config-card__arrow {
+  font-size: 1.8rem;
+  color: var(--color-primary);
+  font-weight: 300;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: transform var(--transition-base);
+}
+
+.config-card:hover .config-card__arrow {
+  transform: translateX(4px);
+}
+
+.config-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e4eef3;
+}
+
+.config-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--color-white);
+  border: 2px solid #c5dfe9;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-stack);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2a6e8a;
+  cursor: pointer;
+  transition: background var(--transition-base), border-color var(--transition-base), color var(--transition-base), transform var(--transition-base);
+  white-space: nowrap;
+}
+
+.config-badge:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+  transform: scale(1.05);
+}
+
+.config-badge:active {
+  transform: scale(0.97);
+}
+
+/* ========================================
    TOAST NOTIFICATIONS
    ======================================== */
 
@@ -1468,6 +1631,34 @@ button {
   .modal-container {
     padding: 24px 20px;
     margin: 10px;
+  }
+
+  .modal-container--config {
+    padding: 24px 16px 20px;
+  }
+
+  .config-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .config-card__icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .config-card__icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .config-card__badges {
+    gap: 8px;
+  }
+
+  .config-badge {
+    padding: 7px 14px;
+    font-size: 0.78rem;
   }
 
   .scanner-camera__viewport {

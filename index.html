@@ -316,12 +316,12 @@
             GUÍA PRÁCTICA
           </a>
 
-          <a class="btn-action" id="btn-ar" href="#" target="_blank" rel="noopener">
+          <button class="btn-action" id="btn-config" type="button">
             <span class="btn-action__icon">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="22.08" x2="12" y2="12" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94a7.07 7.07 0 0 0 .06-.94c0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.04 7.04 0 0 0-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.48.48 0 0 0-.59.22L2.74 8.87a.48.48 0 0 0 .12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.26.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>
             </span>
-            VER EN AR
-          </a>
+            TIPOS DE CONFIGURACIÓN
+          </button>
         </div>
       </div>
     </div>
@@ -471,6 +471,52 @@
         <p>¿No puedes escanear? Ingresa el código manualmente:</p>
         <input type="text" class="scanner-desktop__input" id="manual-code-input" placeholder="Ej: S200" maxlength="10">
         <button class="btn-pill btn-pill--active" id="manual-code-submit">BUSCAR CÓDIGO</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       CONFIGURATION SELECTOR MODAL (PASO 2)
+       ======================================== -->
+  <div id="config-modal" class="modal-overlay hidden">
+    <div class="modal-container modal-container--config">
+      <button class="modal-close" id="config-modal-close" aria-label="Cerrar">&times;</button>
+      <h3 class="config-modal__title">Tipos de configuración</h3>
+      <p class="config-modal__subtitle" id="config-product-label">Sitting — S200</p>
+      <p class="config-modal__hint">Selecciona el tipo de guía visual en cámara que necesitas</p>
+
+      <div class="config-modal__cards">
+        <!-- Option 1: Full configuration -->
+        <button class="config-card" id="config-complete" type="button">
+          <div class="config-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M6.5 6.5h0M17.5 6.5h0M6.5 17.5h0M17.5 17.5h0" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="config-card__body">
+            <h4 class="config-card__title">Configuración completa</h4>
+            <p class="config-card__desc">Guía paso a paso de todos los componentes del producto</p>
+          </div>
+          <span class="config-card__arrow">&rsaquo;</span>
+        </button>
+
+        <!-- Option 2: Per-piece configuration -->
+        <div class="config-card config-card--pieces" id="config-pieces">
+          <div class="config-card__header">
+            <div class="config-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3 7h7l-5.5 4.5 2 7L12 16l-6.5 4.5 2-7L2 9h7z"/></svg>
+            </div>
+            <div class="config-card__body">
+              <h4 class="config-card__title">Configuración por pieza</h4>
+              <p class="config-card__desc">Selecciona el componente específico que deseas configurar</p>
+            </div>
+          </div>
+          <div class="config-card__badges">
+            <button class="config-badge" type="button" data-piece="calzon-pelvico">Calzón pélvico</button>
+            <button class="config-badge" type="button" data-piece="cunas-tronco">Cuñas tronco</button>
+            <button class="config-badge" type="button" data-piece="cuna-cabeza">Cuña cabeza</button>
+            <button class="config-badge" type="button" data-piece="abductor">Abductor</button>
+            <button class="config-badge" type="button" data-piece="otros-apoyos">Otros apoyos</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
