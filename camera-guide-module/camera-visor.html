@@ -48,10 +48,10 @@
     }
 
     /* ========================================
-       AR OVERLAY ANIMATION
+       MÁSCARA GUÍA (ANIMACIÓN AR SUPERPUESTA)
        ======================================== */
 
-    #overlay {
+    #guiding-mask {
       position: fixed;
       top: 50%;
       left: 50%;
@@ -63,7 +63,7 @@
       transition: opacity 0.25s ease;
     }
 
-    #overlay.switching {
+    #guiding-mask.switching {
       opacity: 0;
     }
 
@@ -111,6 +111,34 @@
       background: var(--color-white);
       color: #111;
       border-color: var(--color-white);
+    }
+
+    /* ========================================
+       INSIGNIA DE PRODUCTO (MODELO + PIEZA)
+       ======================================== */
+
+    .product-badge {
+      position: fixed;
+      top: max(16px, env(safe-area-inset-top));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      max-width: 70vw;
+      padding: 9px 18px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: var(--color-white);
+      font-family: var(--font-stack);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* ========================================
@@ -275,7 +303,10 @@
   </div>
 
   <!-- Animación superpuesta -->
-  <img id="overlay" src="animacion-abductor.gif" alt="Animación de configuración del abductor" />
+  <img id="guiding-mask" src="animacion-abductor.gif" alt="Animación de configuración del abductor" />
+
+  <!-- Insignia de producto: Modelo + Pieza -->
+  <div class="product-badge" id="product-badge">Modelo: S200 - Abductor</div>
 
   <!-- Navegación superior: volver + flash -->
   <nav class="top-nav">
@@ -306,80 +337,130 @@
 
   <script>
     (function () {
-      const video = document.getElementById('camera');
-      const overlay = document.getElementById('overlay');
+      const videoElement = document.getElementById('camera');
+      const guidingMask = document.getElementById('guiding-mask');
       const instructionText = document.getElementById('instruction-text');
       const stepNav = document.getElementById('step-nav');
       const cameraError = document.getElementById('camera-error');
 
+      const productBadge = document.getElementById('product-badge');
+
       const FALLBACK_GIF = 'animacion-abductor.gif';
 
       /* ========================================
-         STEP DATA STATE
+         CONTEXTO DE PRODUCTO — LECTURA DEL HASH
+         Formato esperado: #S200/abductor
+         Inyección automática: sin hash → se fuerza S200/abductor
+         para probar de inmediato el flujo completo de 3 pasos.
          ======================================== */
 
-      const STEPS = [
-        {
-          text: 'Paso 1: Prepare la estructura del Sitting e identifique los anclajes del abductor.',
-          asset: 'animacion-abductor-step1.gif',
-        },
-        {
-          text: 'Coloque la cuña lateral a la altura del torso y acérquela suavemente hasta brindar soporte.',
-          asset: 'animacion-abductor.gif',
-        },
-        {
-          text: 'Paso 3: Asegure el arnés pélvico y verifique la alineación final de la postura.',
-          asset: 'animacion-abductor-step3.gif',
-        },
-      ];
+      const DEFAULT_CONTEXT = 'S200/abductor';
 
-      let currentStep = 0;
+      function parseProductContext() {
+        let raw = (window.location.hash || '').replace(/^#\/?/, '').trim();
+        if (!raw) {
+          window.location.hash = DEFAULT_CONTEXT;
+          raw = DEFAULT_CONTEXT;
+        }
+        const parts = raw.split('/');
+        return {
+          model: (parts[0] || 'S200').toUpperCase(),
+          piece: (parts[1] || 'abductor').toLowerCase(),
+        };
+      }
+
+      /* Etiquetas de piezas en español para la insignia superior */
+      const PIECE_LABELS = {
+        abductor: 'Abductor',
+        'calzon-pelvico': 'Calzón pélvico',
+        'cunas-tronco': 'Cuñas tronco',
+        'cuna-cabeza': 'Cuña cabeza',
+        'otros-apoyos': 'Otros apoyos',
+      };
+
+      /* ========================================
+         DATOS DE CONFIGURACIÓN POR PRODUCTO
+         ======================================== */
+
+      const STEPS_CONFIGURATION_DATA = {
+        S200: {
+          abductor: [
+            {
+              text: 'Paso 1: Prepare la estructura del Sitting e identifique los anclajes del abductor.',
+              asset: 'animacion-abductor-step1.gif',
+            },
+            {
+              text: 'Coloque la cuña lateral a la altura del torso y acérquela suavemente hasta brindar soporte.',
+              asset: 'animacion-abductor.gif',
+            },
+            {
+              text: 'Paso 3: Asegure el arnés pélvico y verifique la alineación final de la postura.',
+              asset: 'animacion-abductor-step3.gif',
+            },
+          ],
+        },
+      };
+
+      const productContext = parseProductContext();
+
+      /* Selecciona los pasos del modelo/pieza. Si el modelo es S200 (o no
+         hay coincidencia), mapea a la guía verificada del abductor. */
+      const VISOR_STEPS =
+        (STEPS_CONFIGURATION_DATA[productContext.model] &&
+          STEPS_CONFIGURATION_DATA[productContext.model][productContext.piece]) ||
+        STEPS_CONFIGURATION_DATA.S200.abductor;
+
+      /* Insignia superior: "Modelo: S200 - Abductor" */
+      const pieceLabel = PIECE_LABELS[productContext.piece] || productContext.piece;
+      productBadge.textContent = 'Modelo: ' + productContext.model + ' - ' + pieceLabel;
+
+      let activeStepIndex = 0;
       let videoTrack = null;
       let flashOn = false;
 
-      /* Precheck each step asset; fall back to the base gif when missing */
-      STEPS.forEach(function (step) {
+      /* Verifica cada asset de paso; usa el gif base si falta */
+      VISOR_STEPS.forEach(function (step) {
         const probe = new Image();
         probe.onerror = function () { step.asset = FALLBACK_GIF; };
         probe.src = step.asset;
       });
 
       /* ========================================
-         STEP SWITCHING
+         CAMBIO DE PASO
          ======================================== */
 
-      function setStep(index) {
-        if (index === currentStep || !STEPS[index]) return;
-        currentStep = index;
+      function applyVisorStep(index) {
+        if (index === activeStepIndex || !VISOR_STEPS[index]) return;
+        activeStepIndex = index;
 
         stepNav.querySelectorAll('.step-badge').forEach(function (badge) {
           badge.classList.toggle('step-badge--active', Number(badge.dataset.step) === index);
         });
 
-        /* Fade text + overlay out, swap content, fade back in */
+        /* Atenúa texto + máscara, intercambia contenido y reaparece */
         instructionText.classList.add('switching');
-        overlay.classList.add('switching');
+        guidingMask.classList.add('switching');
 
         setTimeout(function () {
-          instructionText.textContent = STEPS[index].text;
-          overlay.src = STEPS[index].asset;
+          instructionText.textContent = VISOR_STEPS[index].text;
+          guidingMask.src = VISOR_STEPS[index].asset;
           instructionText.classList.remove('switching');
-          overlay.classList.remove('switching');
+          guidingMask.classList.remove('switching');
         }, 200);
       }
 
-      function onStepTap(e) {
+      function onStepBadgeTap(e) {
         const badge = e.target.closest('.step-badge');
         if (!badge) return;
         e.preventDefault();
-        setStep(Number(badge.dataset.step));
+        applyVisorStep(Number(badge.dataset.step));
       }
 
-      stepNav.addEventListener('touchstart', onStepTap, { passive: false });
+      stepNav.addEventListener('touchstart', onStepBadgeTap, { passive: false });
       stepNav.addEventListener('click', function (e) {
-        /* click fires on desktop; touchstart already handled mobile */
+        /* click en escritorio; touchstart ya cubre el móvil */
         const badge = e.target.closest('.step-badge');
-        if (badge) setStep(Number(badge.dataset.step));
+        if (badge) applyVisorStep(Number(badge.dataset.step));
       });
 
       /* ========================================
@@ -392,7 +473,7 @@
             video: { facingMode: 'environment' },
             audio: false,
           });
-          video.srcObject = stream;
+          videoElement.srcObject = stream;
           videoTrack = stream.getVideoTracks()[0] || null;
         } catch (error) {
           console.error('Cámara no disponible:', error);
@@ -425,14 +506,14 @@
          ======================================== */
 
       document.getElementById('btn-shutter').addEventListener('click', function () {
-        if (!video.videoWidth) return;
+        if (!videoElement.videoWidth) return;
         const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        canvas.getContext('2d').drawImage(videoElement, 0, 0);
 
         const link = document.createElement('a');
-        link.download = 'doi-configuracion-paso-' + (currentStep + 1) + '.png';
+        link.download = 'doi-configuracion-paso-' + (activeStepIndex + 1) + '.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
       });

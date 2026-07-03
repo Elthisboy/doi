@@ -2,7 +2,7 @@
    DOI SUPPORT PORTAL — SERVICE WORKER
    ======================================== */
 
-const CACHE_NAME = 'doi-portal-v2';
+const CACHE_NAME = 'doi-portal-v5';
 
 /* --- Core application shell --- */
 const CORE_ASSETS = [
@@ -19,6 +19,8 @@ const CORE_ASSETS = [
   './assets/images/icons/cat-banarse.png',
   './assets/images/icons/cat-caminar.png',
   './assets/images/icons/cat-mesas.png',
+  './camera-guide-module/camera-visor.html',
+  './camera-guide-module/animacion-abductor.gif',
 ];
 
 /* --- Product media & documentation --- */

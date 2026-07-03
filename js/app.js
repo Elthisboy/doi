@@ -540,10 +540,9 @@
      CONFIGURATION MODAL (PASO 2 → PASO 3)
      ======================================== */
 
-  const AR_BASE_URL = 'https://lustrous-pasca-9a0ae1.netlify.app/';
   const LOCAL_GUIDES = {
     /* Piezas con visor de cámara local paso a paso */
-    abductor: 'guia-camara-abductor-doi-main/codigo_de_la_camara.html',
+    abductor: 'camera-guide-module/camera-visor.html',
   };
   let configProductCode = null;
 
@@ -555,6 +554,7 @@
 
     document.getElementById('config-product-label').textContent = title + ' — ' + code;
     document.getElementById('config-modal').classList.remove('hidden');
+    console.log('[doi] Modal "TIPOS DE CONFIGURACIÓN" abierto → producto:', title, '(' + code + ')');
   }
 
   function closeConfigModal() {
@@ -564,18 +564,22 @@
   function launchARView(mode) {
     closeConfigModal();
 
-    /* Piezas con guía local: navegación en la misma ventana para que
-       la flecha de volver del visor regrese a esta vista de producto */
-    if (mode && LOCAL_GUIDES[mode]) {
-      window.location.href = LOCAL_GUIDES[mode] + '#' + configProductCode + '/' + mode;
+    var code = configProductCode || 'S200';
+    console.log('[doi] launchARView() → pieza:', mode, '| producto:', code);
+
+    /* Piezas con guía local (visor de cámara paso a paso).
+       Navegación directa en la misma ventana para que la flecha de
+       volver del visor regrese a esta vista de producto. */
+    if (mode && Object.prototype.hasOwnProperty.call(LOCAL_GUIDES, mode)) {
+      var localPath = LOCAL_GUIDES[mode] + '#' + code + '/' + mode;
+      console.log('[doi] Ruta LOCAL → navegando al visor de cámara:', localPath);
+      window.location.href = localPath;
       return;
     }
 
-    var url = AR_BASE_URL + '#' + configProductCode;
-    if (mode) {
-      url += '/' + mode;
-    }
-    window.open(url, '_blank', 'noopener');
+    /* Piezas sin guía local todavía: aviso en español, sin enlaces externos */
+    console.log('[doi] Pieza sin visor local disponible aún:', mode);
+    showToast('La guía en cámara de esta pieza estará disponible próximamente.');
   }
 
   /* ========================================
@@ -605,9 +609,15 @@
      ======================================== */
 
   function initEventListeners() {
-    document.getElementById('btn-ver-categoria').addEventListener('click', () => {
-      navigateTo(VIEWS.CATALOG);
-    });
+    const verCategoriaBtn = document.getElementById('btn-ver-categoria');
+    if (verCategoriaBtn) {
+      verCategoriaBtn.addEventListener('click', () => {
+        console.log('[doi] Click en "VER CATEGORÍA" → abriendo catálogo de Estabilización');
+        navigateTo(VIEWS.CATALOG);
+      });
+    } else {
+      console.error('[doi] No se encontró el botón #btn-ver-categoria en el DOM');
+    }
 
     document.getElementById('product-grid').addEventListener('click', (e) => {
       const btn = e.target.closest('[data-action="view-product"]');
