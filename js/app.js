@@ -541,6 +541,10 @@
      ======================================== */
 
   const AR_BASE_URL = 'https://lustrous-pasca-9a0ae1.netlify.app/';
+  const LOCAL_GUIDES = {
+    /* Piezas con visor de cámara local paso a paso */
+    abductor: 'guia-camara-abductor-doi-main/codigo_de_la_camara.html',
+  };
   let configProductCode = null;
 
   function openConfigModal() {
@@ -558,12 +562,20 @@
   }
 
   function launchARView(mode) {
+    closeConfigModal();
+
+    /* Piezas con guía local: navegación en la misma ventana para que
+       la flecha de volver del visor regrese a esta vista de producto */
+    if (mode && LOCAL_GUIDES[mode]) {
+      window.location.href = LOCAL_GUIDES[mode] + '#' + configProductCode + '/' + mode;
+      return;
+    }
+
     var url = AR_BASE_URL + '#' + configProductCode;
     if (mode) {
       url += '/' + mode;
     }
     window.open(url, '_blank', 'noopener');
-    closeConfigModal();
   }
 
   /* ========================================

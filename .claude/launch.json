@@ -4,7 +4,7 @@
     {
       "name": "doi-portal",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8090"],
+      "runtimeArgs": [".claude/serve.py"],
       "port": 8090
     }
   ]

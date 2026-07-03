@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#000000" />
+  <title>Guía visual con cámara — doi</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-primary: #fa4615;
+      --color-step-active: #5bb8e0;
+      --color-white: #ffffff;
+      --font-stack: 'Montserrat', 'Arial', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font-stack);
+      background: #000;
+    }
+
+    /* ========================================
+       CAMERA VIDEO — FULL VIEWPORT
+       ======================================== */
+
+    #camera {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    /* ========================================
+       AR OVERLAY ANIMATION
+       ======================================== */
+
+    #overlay {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: min(72vw, 320px);
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      opacity: 0.72;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    #overlay.switching {
+      opacity: 0;
+    }
+
+    /* ========================================
+       TOP HEADER — BACK + FLASH
+       ======================================== */
+
+    .top-nav {
+      position: fixed;
+      top: max(16px, env(safe-area-inset-top));
+      left: 16px;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .icon-btn {
+      width: 46px;
+      height: 46px;
+      border: 1.5px solid rgba(255, 255, 255, 0.55);
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--color-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.15s ease;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .icon-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .icon-btn--flash-on {
+      background: var(--color-white);
+      color: #111;
+      border-color: var(--color-white);
+    }
+
+    /* ========================================
+       CAMERA SHUTTER — FLOATING ACTION CIRCLE
+       ======================================== */
+
+    .shutter {
+      position: fixed;
+      bottom: max(110px, calc(env(safe-area-inset-bottom) + 104px));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      border: 4px solid rgba(255, 255, 255, 0.85);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .shutter::after {
+      content: '';
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--color-white);
+      transition: transform 0.15s ease;
+    }
+
+    .shutter:active::after {
+      transform: scale(0.85);
+    }
+
+    /* ========================================
+       RIGHT VERTICAL STEP NAVIGATOR
+       ======================================== */
+
+    .step-nav {
+      position: fixed;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .step-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid var(--color-white);
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--color-white);
+      font-family: var(--font-stack);
+      font-size: 1.15rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.25s ease, border-color 0.25s ease, transform 0.15s ease, box-shadow 0.25s ease;
+    }
+
+    .step-badge:active {
+      transform: scale(0.9);
+    }
+
+    .step-badge--active {
+      background: var(--color-step-active);
+      border-color: var(--color-white);
+      box-shadow: 0 0 0 4px rgba(91, 184, 224, 0.35);
+    }
+
+    /* ========================================
+       BOTTOM INSTRUCTION CARD — GLASS PILL
+       ======================================== */
+
+    .instruction-card {
+      position: fixed;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      width: min(92vw, 480px);
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 22px;
+      padding: 14px 22px;
+      text-align: center;
+    }
+
+    .instruction-card__text {
+      color: var(--color-white);
+      font-size: 0.92rem;
+      font-weight: 700;
+      line-height: 1.45;
+      transition: opacity 0.2s ease;
+    }
+
+    .instruction-card__text.switching {
+      opacity: 0;
+    }
+
+    /* ========================================
+       CAMERA ERROR STATE
+       ======================================== */
+
+    .camera-error {
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.95rem;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .camera-error.visible {
+      display: flex;
+    }
+
+    /* Landscape adjustments */
+    @media (orientation: landscape) and (max-height: 480px) {
+      .shutter {
+        bottom: auto;
+        top: 50%;
+        left: auto;
+        right: 90px;
+        transform: translateY(-50%);
+      }
+
+      .instruction-card {
+        width: min(70vw, 480px);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Cámara de fondo -->
+  <video id="camera" autoplay playsinline muted></video>
+
+  <!-- Estado de error de cámara -->
+  <div class="camera-error" id="camera-error">
+    No se pudo acceder a la cámara.<br>
+    Revisa los permisos del navegador e intenta nuevamente.
+  </div>
+
+  <!-- Animación superpuesta -->
+  <img id="overlay" src="animacion-abductor.gif" alt="Animación de configuración del abductor" />
+
+  <!-- Navegación superior: volver + flash -->
+  <nav class="top-nav">
+    <button class="icon-btn" id="btn-back" type="button" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+    </button>
+    <button class="icon-btn" id="btn-flash" type="button" aria-label="Activar linterna">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </button>
+  </nav>
+
+  <!-- Navegador vertical de pasos -->
+  <nav class="step-nav" id="step-nav" aria-label="Pasos de configuración">
+    <button class="step-badge step-badge--active" type="button" data-step="0" aria-label="Paso 1">1</button>
+    <button class="step-badge" type="button" data-step="1" aria-label="Paso 2">2</button>
+    <button class="step-badge" type="button" data-step="2" aria-label="Paso 3">3</button>
+  </nav>
+
+  <!-- Botón obturador de cámara -->
+  <button class="shutter" id="btn-shutter" type="button" aria-label="Capturar foto"></button>
+
+  <!-- Tarjeta de instrucción inferior -->
+  <div class="instruction-card">
+    <p class="instruction-card__text" id="instruction-text">
+      Paso 1: Prepare la estructura del Sitting e identifique los anclajes del abductor.
+    </p>
+  </div>
+
+  <script>
+    (function () {
+      const video = document.getElementById('camera');
+      const overlay = document.getElementById('overlay');
+      const instructionText = document.getElementById('instruction-text');
+      const stepNav = document.getElementById('step-nav');
+      const cameraError = document.getElementById('camera-error');
+
+      const FALLBACK_GIF = 'animacion-abductor.gif';
+
+      /* ========================================
+         STEP DATA STATE
+         ======================================== */
+
+      const STEPS = [
+        {
+          text: 'Paso 1: Prepare la estructura del Sitting e identifique los anclajes del abductor.',
+          asset: 'animacion-abductor-step1.gif',
+        },
+        {
+          text: 'Coloque la cuña lateral a la altura del torso y acérquela suavemente hasta brindar soporte.',
+          asset: 'animacion-abductor.gif',
+        },
+        {
+          text: 'Paso 3: Asegure el arnés pélvico y verifique la alineación final de la postura.',
+          asset: 'animacion-abductor-step3.gif',
+        },
+      ];
+
+      let currentStep = 0;
+      let videoTrack = null;
+      let flashOn = false;
+
+      /* Precheck each step asset; fall back to the base gif when missing */
+      STEPS.forEach(function (step) {
+        const probe = new Image();
+        probe.onerror = function () { step.asset = FALLBACK_GIF; };
+        probe.src = step.asset;
+      });
+
+      /* ========================================
+         STEP SWITCHING
+         ======================================== */
+
+      function setStep(index) {
+        if (index === currentStep || !STEPS[index]) return;
+        currentStep = index;
+
+        stepNav.querySelectorAll('.step-badge').forEach(function (badge) {
+          badge.classList.toggle('step-badge--active', Number(badge.dataset.step) === index);
+        });
+
+        /* Fade text + overlay out, swap content, fade back in */
+        instructionText.classList.add('switching');
+        overlay.classList.add('switching');
+
+        setTimeout(function () {
+          instructionText.textContent = STEPS[index].text;
+          overlay.src = STEPS[index].asset;
+          instructionText.classList.remove('switching');
+          overlay.classList.remove('switching');
+        }, 200);
+      }
+
+      function onStepTap(e) {
+        const badge = e.target.closest('.step-badge');
+        if (!badge) return;
+        e.preventDefault();
+        setStep(Number(badge.dataset.step));
+      }
+
+      stepNav.addEventListener('touchstart', onStepTap, { passive: false });
+      stepNav.addEventListener('click', function (e) {
+        /* click fires on desktop; touchstart already handled mobile */
+        const badge = e.target.closest('.step-badge');
+        if (badge) setStep(Number(badge.dataset.step));
+      });
+
+      /* ========================================
+         CAMERA
+         ======================================== */
+
+      async function startCamera() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' },
+            audio: false,
+          });
+          video.srcObject = stream;
+          videoTrack = stream.getVideoTracks()[0] || null;
+        } catch (error) {
+          console.error('Cámara no disponible:', error);
+          cameraError.classList.add('visible');
+        }
+      }
+
+      /* ========================================
+         FLASH / LINTERNA
+         ======================================== */
+
+      document.getElementById('btn-flash').addEventListener('click', async function () {
+        if (!videoTrack) return;
+        const capabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+        if (!capabilities.torch) return;
+
+        flashOn = !flashOn;
+        try {
+          await videoTrack.applyConstraints({ advanced: [{ torch: flashOn }] });
+          this.classList.toggle('icon-btn--flash-on', flashOn);
+        } catch (err) {
+          console.warn('Linterna no disponible:', err);
+          flashOn = false;
+          this.classList.remove('icon-btn--flash-on');
+        }
+      });
+
+      /* ========================================
+         SHUTTER — PHOTO CAPTURE
+         ======================================== */
+
+      document.getElementById('btn-shutter').addEventListener('click', function () {
+        if (!video.videoWidth) return;
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+
+        const link = document.createElement('a');
+        link.download = 'doi-configuracion-paso-' + (currentStep + 1) + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+
+      /* ========================================
+         BACK NAVIGATION
+         ======================================== */
+
+      document.getElementById('btn-back').addEventListener('click', function () {
+        if (history.length > 1) {
+          history.back();
+        } else {
+          window.close();
+        }
+      });
+
+      startCamera();
+    })();
+  </script>
+</body>
+</html>
