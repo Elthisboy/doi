@@ -540,9 +540,17 @@
      CONFIGURATION MODAL (PASO 2 → PASO 3)
      ======================================== */
 
-  const LOCAL_GUIDES = {
-    /* Piezas con visor de cámara local paso a paso */
-    abductor: 'camera-guide-module/camera-visor.html',
+  const VISOR_FILE = 'camera-guide-module/camera-visor.html';
+
+  /* data-piece del badge → clave de contexto del visor de cámara.
+     Todas las piezas abren el visor local paso a paso. */
+  const PIECE_HASH_MAP = {
+    'calzon-pelvico': 'calzon',
+    'cunas-tronco': 'cunas-tronco',
+    'cuna-cabeza': 'cuna-cabeza',
+    'abductor': 'abductor',
+    'otros-apoyos': 'otros',
+    'completa': 'completa',
   };
   let configProductCode = null;
 
@@ -565,29 +573,14 @@
     closeConfigModal();
 
     var code = configProductCode || 'S200';
-    console.log('[doi] launchARView() → pieza:', mode, '| producto:', code);
 
-    /* Excepción explícita: la pieza "abductor" SIEMPRE abre el visor de
-       cámara local y nunca cae en el aviso de "próximamente". */
-    if (mode === 'abductor') {
-      console.log('[doi] Abductor → abriendo visor de cámara local (S200)');
-      window.location.href = 'camera-guide-module/camera-visor.html#' + code + '/abductor';
-      return;
-    }
-
-    /* Otras piezas con guía local (visor de cámara paso a paso).
-       Navegación directa en la misma ventana para que la flecha de
-       volver del visor regrese a esta vista de producto. */
-    if (mode && Object.prototype.hasOwnProperty.call(LOCAL_GUIDES, mode)) {
-      var localPath = LOCAL_GUIDES[mode] + '#' + code + '/' + mode;
-      console.log('[doi] Ruta LOCAL → navegando al visor de cámara:', localPath);
-      window.location.href = localPath;
-      return;
-    }
-
-    /* Piezas sin guía local todavía: aviso en español, sin enlaces externos */
-    console.log('[doi] Pieza sin visor local disponible aún:', mode);
-    showToast('La guía en cámara de esta pieza estará disponible próximamente.');
+    /* Toda pieza abre el visor de cámara local con su hash de contexto.
+       Navegación en la misma ventana para que la flecha de volver del
+       visor regrese a esta vista de producto. */
+    var pieceKey = PIECE_HASH_MAP[mode] || mode || 'abductor';
+    var localPath = VISOR_FILE + '#' + code + '/' + pieceKey;
+    console.log('[doi] launchARView() → pieza:', mode, '→ visor local:', localPath);
+    window.location.href = localPath;
   }
 
   /* ========================================
