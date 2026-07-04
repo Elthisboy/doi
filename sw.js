@@ -2,7 +2,7 @@
    DOI SUPPORT PORTAL — SERVICE WORKER
    ======================================== */
 
-const CACHE_NAME = 'doi-portal-v6';
+const CACHE_NAME = 'doi-portal-v7';
 
 /* --- Core application shell --- */
 const CORE_ASSETS = [

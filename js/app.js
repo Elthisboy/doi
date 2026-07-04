@@ -567,7 +567,15 @@
     var code = configProductCode || 'S200';
     console.log('[doi] launchARView() → pieza:', mode, '| producto:', code);
 
-    /* Piezas con guía local (visor de cámara paso a paso).
+    /* Excepción explícita: la pieza "abductor" SIEMPRE abre el visor de
+       cámara local y nunca cae en el aviso de "próximamente". */
+    if (mode === 'abductor') {
+      console.log('[doi] Abductor → abriendo visor de cámara local (S200)');
+      window.location.href = 'camera-guide-module/camera-visor.html#' + code + '/abductor';
+      return;
+    }
+
+    /* Otras piezas con guía local (visor de cámara paso a paso).
        Navegación directa en la misma ventana para que la flecha de
        volver del visor regrese a esta vista de producto. */
     if (mode && Object.prototype.hasOwnProperty.call(LOCAL_GUIDES, mode)) {
