@@ -319,6 +319,26 @@
       text-align: center;
     }
 
+    .instruction-card__subtitle {
+      display: none;
+      color: var(--color-step-active);
+      font-family: var(--font-stack);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      transition: opacity 0.2s ease;
+    }
+
+    .instruction-card__subtitle.visible {
+      display: block;
+    }
+
+    .instruction-card__subtitle.switching {
+      opacity: 0;
+    }
+
     .instruction-card__text {
       color: var(--color-white);
       font-size: 0.92rem;
@@ -416,6 +436,7 @@
 
   <!-- Tarjeta de instrucción inferior -->
   <div class="instruction-card">
+    <span class="instruction-card__subtitle" id="instruction-subtitle"></span>
     <p class="instruction-card__text" id="instruction-text">
       Paso 1: Prepare la estructura del Sitting e identifique los anclajes del abductor.
     </p>
@@ -426,6 +447,7 @@
       const videoElement = document.getElementById('camera');
       const guidingMask = document.getElementById('guiding-mask');
       const instructionText = document.getElementById('instruction-text');
+      const instructionSubtitle = document.getElementById('instruction-subtitle');
       const stepNav = document.getElementById('step-nav');
       const cameraError = document.getElementById('camera-error');
 
@@ -485,6 +507,7 @@
             {
               text: 'Paso 3: Asegure el abductor y verifique que la separación de piernas quede alineada y firme.',
               asset: 'animacion-abductor-step3.gif',
+              subtitle: 'Ajuste Simétrico',
             },
           ],
           calzon: [
@@ -499,6 +522,7 @@
             {
               text: 'Paso 3: Verifique que la pelvis quede estable y simétrica, sin deslizamiento hacia adelante.',
               asset: 'animacion-calzon-step3.gif',
+              subtitle: 'Ajuste Simétrico',
             },
           ],
           'cunas-tronco': [
@@ -513,20 +537,22 @@
             {
               text: 'Paso 3: Fije las cuñas y confirme que el tronco quede erguido y centrado en la línea media.',
               asset: 'animacion-cunas-tronco-step3.gif',
+              subtitle: 'Ajuste Simétrico',
             },
           ],
           'cuna-cabeza': [
             {
               text: 'Paso 1: Ajuste la altura del soporte de cabeza según la longitud del cuello del usuario.',
-              asset: 'animacion-cuna-cabeza-step1.gif',
+              asset: 'animacion-cunas-cabeza.gif',
             },
             {
               text: 'Paso 2: Acomode la cuña de cabeza en la zona occipital, apoyando sin forzar la posición.',
-              asset: 'animacion-cuna-cabeza.gif',
+              asset: 'animacion-cunas-cabeza.gif',
             },
             {
               text: 'Paso 3: Verifique que la cabeza quede alineada con el tronco y la mirada al frente.',
-              asset: 'animacion-cuna-cabeza-step3.gif',
+              asset: 'animacion-cunas-cabeza.gif',
+              subtitle: 'Ajuste Diferenciado',
             },
           ],
           otros: [
@@ -541,6 +567,7 @@
             {
               text: 'Paso 3: Ajuste y verifique la firmeza del apoyo, confirmando la comodidad del usuario.',
               asset: 'animacion-otros-step3.gif',
+              subtitle: 'Ajuste Diferenciado',
             },
           ],
           completa: [
@@ -555,6 +582,7 @@
             {
               text: 'Paso 3: Verifique la postura global: alineación, simetría y estabilidad del usuario.',
               asset: 'animacion-abductor-step3.gif',
+              subtitle: 'Ajuste Simétrico',
             },
           ],
         },
@@ -592,8 +620,21 @@
         }
       });
 
+      /* Muestra u oculta el subtítulo operativo (Ajuste Simétrico /
+         Ajuste Diferenciado) según el paso actual. */
+      function setSubtitle(sub) {
+        if (sub) {
+          instructionSubtitle.textContent = sub;
+          instructionSubtitle.classList.add('visible');
+        } else {
+          instructionSubtitle.textContent = '';
+          instructionSubtitle.classList.remove('visible');
+        }
+      }
+
       /* Render inicial del primer paso según la pieza del contexto */
       instructionText.textContent = VISOR_STEPS[0].text;
+      setSubtitle(VISOR_STEPS[0].subtitle);
       guidingMask.src = VISOR_STEPS[0].asset;
 
       /* ========================================
@@ -608,13 +649,16 @@
           badge.classList.toggle('step-badge--active', Number(badge.dataset.step) === index);
         });
 
-        /* Atenúa texto + máscara, intercambia contenido y reaparece */
+        /* Atenúa subtítulo + texto + máscara, intercambia y reaparece */
+        instructionSubtitle.classList.add('switching');
         instructionText.classList.add('switching');
         guidingMask.classList.add('switching');
 
         setTimeout(function () {
           instructionText.textContent = VISOR_STEPS[index].text;
+          setSubtitle(VISOR_STEPS[index].subtitle);
           guidingMask.src = VISOR_STEPS[index].asset;
+          instructionSubtitle.classList.remove('switching');
           instructionText.classList.remove('switching');
           guidingMask.classList.remove('switching');
         }, 200);
