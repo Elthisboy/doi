@@ -453,8 +453,6 @@
 
       const productBadge = document.getElementById('product-badge');
 
-      const FALLBACK_GIF = 'animacion-abductor.gif';
-
       /* ========================================
          CONTEXTO DE PRODUCTO — LECTURA DEL HASH
          Formato esperado: #S200/abductor
@@ -589,6 +587,18 @@
       };
 
       const productContext = parseProductContext();
+
+      /* Gif de respaldo por pieza: cada contexto usa su propio asset,
+         nunca se fuerza animacion-abductor.gif para otras piezas. */
+      const PIECE_FALLBACK = {
+        abductor: 'animacion-abductor.gif',
+        calzon: 'animacion-abductor.gif',
+        'cunas-tronco': 'animacion-abductor.gif',
+        'cuna-cabeza': 'animacion-cunas-cabeza.gif',
+        otros: 'animacion-abductor.gif',
+        completa: 'animacion-abductor.gif',
+      };
+      const FALLBACK_GIF = PIECE_FALLBACK[productContext.piece] || 'animacion-abductor.gif';
 
       /* Selecciona los pasos del modelo/pieza. Si el modelo es S200 (o no
          hay coincidencia), mapea a la guía verificada del abductor. */
