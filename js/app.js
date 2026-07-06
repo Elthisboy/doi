@@ -54,8 +54,8 @@
       whatsapp: 'https://wa.me/56999694935?text=Hola%2C%20tengo%20una%20consulta%20sobre%20el%20producto%20Sitting%20(S200)',
       tutorial: 'https://www.youtube.com/watch?v=XYnNx3IqQVE',
       storeUrl: 'https://doifamily.com/producto/sitting-m/',
-      guiaTecnica: 'assets/docs/sitting-guia-tecnica.pdf',
-      guiaPractica: 'assets/docs/sitting-guia-practica.pdf',
+      guiaTecnica: 'docs/S200/sitting-guia-tecnica-S200.pdf',
+      guiaPractica: 'docs/S200/Manual-S200.pdf',
       configPieces: ['calzon-pelvico', 'cunas-tronco', 'cuna-cabeza', 'abductor', 'otros-apoyos'],
     },
     {

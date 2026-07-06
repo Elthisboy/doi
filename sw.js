@@ -2,7 +2,7 @@
    DOI SUPPORT PORTAL — SERVICE WORKER
    ======================================== */
 
-const CACHE_NAME = 'doi-portal-v9';
+const CACHE_NAME = 'doi-portal-v11';
 
 /* --- Core application shell --- */
 const CORE_ASSETS = [
@@ -35,14 +35,15 @@ const PRODUCT_ASSETS = [
   './assets/images/products/estabilizacion/P700/secondary.png',
   './assets/images/products/estabilizacion/P300/main.png',
   './assets/images/products/estabilizacion/P300/secondary.png',
-  './assets/docs/sitting-guia-tecnica.pdf',
-  './assets/docs/sitting-guia-practica.pdf',
+  './docs/S200/sitting-guia-tecnica-S200.pdf',
+  './docs/S200/Manual-S200.pdf',
 ];
 
 /* --- Patterns for cache-first routing --- */
 const CACHE_FIRST_PATTERNS = [
   /\/assets\/images\//,
   /\/assets\/docs\//,
+  /\/docs\//,
   /fonts\.googleapis\.com/,
   /fonts\.gstatic\.com/,
 ];

@@ -639,6 +639,36 @@ button {
   max-width: 420px;
 }
 
+/* ========================================
+   DOCUMENTOS AGRUPADOS POR MODELO
+   ======================================== */
+
+.docs-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  padding: 18px 18px 20px;
+  background: rgba(125, 209, 243, 0.14);
+  border: 2px solid var(--color-border-blue);
+  border-radius: var(--radius-card);
+}
+
+.docs-group__title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.docs-group__hint {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #2a6e8a;
+  margin-top: -8px;
+}
+
 .btn-action {
   display: flex;
   align-items: center;
